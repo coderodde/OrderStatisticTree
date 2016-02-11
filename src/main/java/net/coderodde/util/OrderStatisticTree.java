@@ -27,6 +27,7 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
     
     private Node<T> root;
     private int size;
+    private int modCount;
     
     public void add(T element) {
         Objects.requireNonNull(element, "The input element is null.");
@@ -86,10 +87,117 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
         return x != null;
     }
     
+    public void remove(T element) {
+        Node<T> x = root;
+        int cmp;
+        
+        while (x != null && (cmp = element.compareTo(x.key)) != 0) {
+            if (cmp < 0) {
+                x = x.left;
+            } else {
+                x = x.right;
+            }
+        }
+        
+        if (x == null) {
+            System.out.println("up");
+            return;
+        }
+        
+        x = deleteNode(x);
+        fixAfterModification(x, false);
+    }
+    
     public int size() {
         return size;
     }
      
+    private Node<T> deleteNode(Node<T> node) {
+        if (node.left == null && node.right == null) {
+            // 'node' has no children.
+            Node<T> parent = node.parent;
+            
+            if (parent == null) {
+                root = null;
+                size = 0;
+                ++modCount;
+                return node;
+            }
+            
+            if (node == parent.left) {
+                parent.left = null;
+            } else {
+                parent.right = null;
+            }
+            
+            --size;
+            ++modCount;
+            return node;
+        }
+        
+        if (node.left == null || node.right == null) {
+            Node<T> child;
+            
+            // 'node' has only one child.
+            if (node.left != null) {
+                child = node.left;
+            } else {
+                child = node.right;
+            }
+            
+            Node<T> parent = node.parent;
+            child.parent = parent;
+            
+            if (parent == null) {
+                root = child;
+                --size;
+                ++modCount;
+                return node;
+            }
+            
+            if (node == parent.left) {
+                parent.left = child;
+            } else {
+                parent.right = child;
+            }
+            
+            --size;
+            ++modCount;
+            
+            return node;
+        }
+        
+        // 'node' has both children.
+        T key = node.key;
+        Node<T> successor = minimumNode(node.right);
+        node.key = successor.key;
+        Node<T> child = successor.right;
+        Node<T> parent = successor.parent;
+        
+        if (parent.left == successor) {
+            parent.left = child;
+        } else {
+            parent.right = child;
+        }
+        
+        if (child != null) {
+            child.parent = parent;
+        }
+        
+        --size;
+        ++modCount;
+        successor.key = key;
+        return successor;
+    }
+    
+    private Node<T> minimumNode(Node<T> node) {
+        while (node.left != null) {
+            node = node.left;
+        }
+        
+        return node;
+    }
+    
     private int height(Node<T> node) {
         return node == null ? -1 : node.height;
     }
