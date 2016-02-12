@@ -48,9 +48,11 @@ public class Demo {
         
         System.out.println("Healthy: " + orderTree.isHealthy());
         
-        for (int i = 0; i < size / 3; ++i) {
+        for (int i = 0; i < 10; ++i) {
             toRemove.add(contents.get(random.nextInt(contents.size())));
         }
+        
+        toRemove.add(toRemove.get(2));
         
         startTime = System.nanoTime();
         

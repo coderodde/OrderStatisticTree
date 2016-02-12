@@ -128,7 +128,7 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
         Node<T> node = root;
         
         while (true) {
-            if (index > node.count) { // 10 - index = 10
+            if (index > node.count) { 
                 index -= node.count + 1;
                 node = node.right;
             } else if (index < node.count) {
@@ -280,7 +280,7 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
         }
         
         // 'node' has both children.
-        T key = node.key;
+        T tmpKey = node.key;
         Node<T> successor = minimumNode(node.right);
         node.key = successor.key;
         Node<T> child = successor.right;
@@ -312,6 +312,7 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
 //        addToCounters(parent, -1);
         --size;
         ++modCount;
+        successor.key = tmpKey;
         return successor;
     }
      
@@ -325,19 +326,6 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
      
     private int height(Node<T> node) {
         return node == null ? -1 : node.height;
-    }
-    
-    private void addToCounters(Node<T> node, int value) {
-        Node<T> parent = node.parent;
-        
-        while (parent != null) {
-            if (parent.left == node) {
-                parent.count += value;
-            }
-            
-            node = parent;
-            parent = parent.parent;
-        }
     }
     
     private Node<T> leftRotate(Node<T> node1) {
@@ -463,12 +451,12 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
             return true;
         }
         
-//        boolean hasCycles = containsCycles();
-//        
-//        if (hasCycles) {
-//            System.out.println("Has cycles.");
-//            return false;
-//        }
+        boolean hasCycles = containsCycles();
+        
+        if (hasCycles) {
+            System.out.println("Has cycles.");
+            return false;
+        }
         
         boolean heightsOk = heightsAreCorrect();
         
@@ -484,12 +472,12 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
             return false;
         }
         
-//        boolean wellIndexed = isWellIndexed();
-//        
-//        if (!wellIndexed) {
-//            System.out.println("Is not well indexed.");
-//            return false;
-//        }
+        boolean wellIndexed = isWellIndexed();
+        
+        if (!wellIndexed) {
+            System.out.println("Is not well indexed.");
+            return false;
+        }
         
         return true;
 //        return !containsCycles() 

@@ -57,6 +57,8 @@ public class OrderStatisticTreeTest {
             tree.add(i);
         }
         
+        assertTrue(tree.isHealthy());
+        
         for (int i = 21, size = 10; i <= 27; ++i, --size) {
             assertEquals(size, tree.size());
             assertFalse(tree.isEmpty());
@@ -162,15 +164,16 @@ public class OrderStatisticTreeTest {
         }
     }
     
-    @Test
+//    @Test
     public void tryReproduceTheCounterBug() {
-        long seed =     System.nanoTime();
+        // 22753551601730
+        long seed = 22753551601730L; System.nanoTime();
         Random random = new Random(seed);
-        List<Integer> list = new ArrayList<>(10);
+        List<Integer> list = new ArrayList<>();
         
         System.out.println("tryReproduceTheCounterBug: seed = " + seed);
         
-        for (int i = 0; i < 100; ++i) {
+        for (int i = 0; i < 50; ++i) {
             int number = random.nextInt(1000);
             list.add(number);
             tree.add(number);
@@ -179,8 +182,9 @@ public class OrderStatisticTreeTest {
         
         for (Integer i : list) {
             tree.remove(i);
-            System.out.println(i);
-            assertTrue(tree.isHealthy());
+            boolean healthy = tree.isHealthy();
+            System.out.println("i = " + i);
+            assertTrue(healthy);
         }
     }
 }
