@@ -126,6 +126,16 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
         return size;
     }
     
+    public boolean isEmpty() {
+        return size == 0;
+    }
+    
+    public void clear() {
+        modCount += size;
+        root = null;
+        size = 0; 
+    }
+    
     private Node<T> deleteNode(Node<T> node) {
         if (node.left == null && node.right == null) {
             // 'node' has no children.
