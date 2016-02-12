@@ -164,16 +164,49 @@ public class OrderStatisticTreeTest {
         }
     }
     
-//    @Test
+    @Test
+    public void findBug() {
+        tree.add(0);
+        assertTrue(tree.isHealthy());
+        
+        tree.add(-1);
+        tree.remove(-1);
+        assertTrue(tree.isHealthy());
+        
+        tree.add(1);
+        tree.remove(1);
+        assertTrue(tree.isHealthy());
+        
+        tree.add(-1);
+        tree.add(1);
+        tree.remove(0);
+        assertTrue(tree.isHealthy());
+        
+        tree.clear();
+        tree.add(0);
+        tree.add(-1);
+        tree.add(10);
+        tree.add(5);
+        tree.add(15);
+        tree.add(11);
+        tree.add(30);
+        tree.add(7);
+        
+        tree.remove(-1);
+        
+        assertTrue(tree.isHealthy());
+    }
+    
+    @Test
     public void tryReproduceTheCounterBug() {
-        // 22753551601730
-        long seed = 22753551601730L; System.nanoTime();
+        // 33303034910970 finds the bug in a tree of size 10!
+        long seed = 33303034910970L; System.nanoTime();
         Random random = new Random(seed);
         List<Integer> list = new ArrayList<>();
         
         System.out.println("tryReproduceTheCounterBug: seed = " + seed);
         
-        for (int i = 0; i < 50; ++i) {
+        for (int i = 0; i < 10; ++i) {
             int number = random.nextInt(1000);
             list.add(number);
             tree.add(number);

@@ -9,7 +9,7 @@ import java.util.TreeSet;
 public class Demo {
     
     private static void profileAgainstTreeSet() {
-        long seed = 16222662995487L; System.nanoTime();
+        long seed = System.nanoTime();
         final int size = 1_000_000;
         Random random = new Random(seed);
         TreeSet<Integer> treeSet = new TreeSet<>();
@@ -48,11 +48,9 @@ public class Demo {
         
         System.out.println("Healthy: " + orderTree.isHealthy());
         
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i < size / 4; ++i) {
             toRemove.add(contents.get(random.nextInt(contents.size())));
         }
-        
-        toRemove.add(toRemove.get(2));
         
         startTime = System.nanoTime();
         

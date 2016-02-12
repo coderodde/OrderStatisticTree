@@ -564,10 +564,7 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
     }
     
     private boolean isWellIndexed() {
-        boolean yeah = isWellIndexed(root);
-        System.out.println("yeah: " + yeah);
-//        return isWellIndexed(root);
-        return yeah;
+        return isWellIndexed(root);
     }
     
     private boolean isWellIndexed(Node<T> node) {
