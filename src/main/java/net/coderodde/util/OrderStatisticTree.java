@@ -38,6 +38,7 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
         if (root == null) {
             root = new Node<>(element);
             size = 1;
+            modCount++;
             return;
         }
         
@@ -71,17 +72,7 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
         }
         
         newnode.parent = parent;
-        node = newnode;
-        
-        while (parent != null) {
-            if (parent.left == node) {
-                parent.count++;
-            }
-            
-            node = parent;
-            parent = parent.parent;
-        }
-        
+        addToCounters(newnode, 1);
         size++;
         fixAfterModification(newnode, true);
     }
@@ -210,25 +201,15 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
             }
             
             if (node == parent.left) {
+                addToCounters(node, -1);
                 parent.left = null;
             } else {
                 parent.right = null;
+                addToCounters(parent, -1);
             }
             
             --size;
             ++modCount;
-            
-            Node<T> grandParent = parent.parent;
-            
-            while (grandParent != null) {
-                if (grandParent.left == parent) {
-                    grandParent.count--;
-                }
-                
-                parent = grandParent;
-                grandParent = grandParent.parent;
-            }
-            
             return node;
         }
         
@@ -261,15 +242,7 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
             --size;
             ++modCount;
             
-            while (parent != null) {
-                if (parent.left == child) {
-                    parent.count--;
-                }
-                
-                child = parent;
-                parent = parent.parent;
-            }
-            
+            addToCounters(child, -1);
             return node;
         }
         
@@ -290,17 +263,8 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
             child.parent = parent;
         }
         
-        Node<T> pLo = child;
-        
-        while (parent != null) {
-            if (parent.left == pLo) {
-                parent.count--;
-            }
-            
-            pLo = parent;
-            parent = parent.parent;
-        }
-        
+        parent.count--;
+        addToCounters(parent, -1);
         --size;
         ++modCount;
         successor.key = key;
@@ -317,6 +281,19 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
      
     private int height(Node<T> node) {
         return node == null ? -1 : node.height;
+    }
+    
+    private void addToCounters(Node<T> node, int value) {
+        Node<T> parent = node.parent;
+        
+        while (parent != null) {
+            if (parent.left == node) {
+                parent.count += value;
+            }
+            
+            node = parent;
+            parent = parent.parent;
+        }
     }
     
     private Node<T> leftRotate(Node<T> node1) {
@@ -436,6 +413,10 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
     }
     
     public boolean isHealthy() {
+        if (root == null) {
+            return true;
+        }
+        
         return !containsCycles() 
                 && heightsAreCorrect() 
                 && isBalanced()

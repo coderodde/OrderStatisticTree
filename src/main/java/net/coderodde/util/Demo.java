@@ -1,42 +1,112 @@
 package net.coderodde.util;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.TreeSet;
+
 public class Demo {
     
-    private static final int SIZE = 1000;
+    private static void profileAgainstTreeSet() {
+        long seed = 16222662995487L; System.nanoTime();
+        final int size = 1_000_000;
+        Random random = new Random(seed);
+        TreeSet<Integer> treeSet = new TreeSet<>();
+        OrderStatisticTree<Integer> orderTree = new OrderStatisticTree<>();
+        
+        System.out.println("Seed = " + seed);
+        
+        List<Integer> contents = new ArrayList<>(size);
+        List<Integer> toRemove = new ArrayList<>(size);
+        
+        for (int i = 0; i < size; ++i) {
+            contents.add(random.nextInt());
+        }
+        
+        long startTime = System.nanoTime(); 
+        
+        for (Integer i : contents) {
+            treeSet.add(i);
+        }
+        
+        long endTime = System.nanoTime();
+        
+        System.out.printf("TreeSet.add() in %.2f millseconds.\n",
+                          (endTime - startTime) / 1e6);
+        
+        startTime = System.nanoTime();
+        
+        for (Integer i : contents) {
+            orderTree.add(i);
+        }
+            
+        endTime = System.nanoTime();
+        
+        System.out.printf("OrderStatisticTree.add() in %.2f millseconds.\n",
+                          (endTime - startTime) / 1e6);
+        
+        System.out.println("Healthy: " + orderTree.isHealthy());
+        
+        for (int i = 0; i < size / 3; ++i) {
+            toRemove.add(contents.get(random.nextInt(contents.size())));
+        }
+        
+        startTime = System.nanoTime();
+        
+        for (Integer i : toRemove) {
+            treeSet.remove(i);
+        }
+        
+        endTime = System.nanoTime();
+        
+        System.out.printf("TreeSet.remove() in %.2f millseconds.\n",
+                          (endTime - startTime) / 1e6);
+        
+        startTime = System.nanoTime();
+        
+        for (Integer i : toRemove) {
+            orderTree.remove(i);
+        }
+        
+        endTime = System.nanoTime();
+        
+        System.out.printf("OrderStatisticTree.remove() in %.2f millseconds.\n",
+                          (endTime - startTime) / 1e6);
+        
+        System.out.println("Healthy: " + orderTree.isHealthy());
+    }
     
     public static void main(String[] args) {
-        OrderStatisticTree<Integer> tree = new OrderStatisticTree<>();
+        profileAgainstTreeSet();
+    }
+    
+    private static Integer select(TreeSet<Integer> set, int index) {
+        Iterator<Integer> i = set.iterator();
         
-        for (int i = 0; i < SIZE; ++i) {
-            tree.add(i);
-        }
-        
-        System.out.println("Healthy: " + tree.isHealthy());
-        
-        tree.add(10);
-        tree.add(11);
-        System.out.println("size: " + tree.size());
-        
-        for (int i = 0; i < SIZE; ++i) {
-            if (!tree.contains(i)) {
-                System.out.println("fdhsa");
+        while (i.hasNext()) {
+            if (index == 0) {
+                return i.next();
             }
+            
+            i.next();
+            index++;
         }
         
-        System.out.println(tree.contains(-1));
+        return -1;
+    }
+    
+    private static int rank(TreeSet<Integer> set, Integer element) {
+        int index = 0;
         
-        for (int i = 100; i < 200; ++i) {
-            tree.remove(i);
-        }
-        
-        System.out.println("size after deletion: " + tree.size());
-        
-        for (int i = 100; i < 200; ++i) {
-            if (tree.contains(i)) {
-                System.out.println("wrong! " + i);
+        for (Integer i : set) {
+            if (i.equals(element)) {
+                return index;
             }
+            
+            ++index;
         }
         
-        System.out.println("Healthy: " + tree.isHealthy());
+        return -1;
     }
 }

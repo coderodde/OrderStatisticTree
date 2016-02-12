@@ -1,5 +1,8 @@
 package net.coderodde.util;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -20,6 +23,7 @@ public class OrderStatisticTreeTest {
         for (int i = 10; i > 0; --i) {
             assertEquals(10 - i, tree.size());
             tree.add(2 * i);
+            assertTrue(tree.isHealthy());
             assertEquals(11 - i, tree.size());
             assertFalse(tree.isEmpty());
         }
@@ -37,6 +41,7 @@ public class OrderStatisticTreeTest {
         
         for (int i = 0; i < 100; ++i) {
             tree.add(i);
+            assertTrue(tree.isHealthy());
             assertFalse(tree.isEmpty());
         }
         
@@ -56,6 +61,8 @@ public class OrderStatisticTreeTest {
             assertEquals(size, tree.size());
             assertFalse(tree.isEmpty());
             tree.remove(i);
+//            System.out.println(i);
+            assertTrue(tree.isHealthy());
             assertFalse(tree.isEmpty());
             assertEquals(size - 1, tree.size());
         }
@@ -68,6 +75,7 @@ public class OrderStatisticTreeTest {
         for (int i = 0; i < 5; ++i) {
             assertEquals(i, tree.size());
             tree.add(i);
+            assertTrue(tree.isHealthy());
             assertEquals(i + 1, tree.size());
         }
     }
@@ -151,6 +159,30 @@ public class OrderStatisticTreeTest {
         
         for (int i = 50; i < 60; ++i) {
             assertEquals(-1, tree.rank(i));
+        }
+    }
+    
+    @Test
+    public void tryReproduceTheCounterBug() {
+        long seed = 17000001934765L; // System.nanoTime();
+        Random random = new Random(seed);
+        List<Integer> list = new ArrayList<>(10);
+        
+        System.out.println("tryReproduceTheCounterBug: seed = " + seed);
+        
+        
+        
+        for (int i = 0; i < 10; ++i) {
+            int number = random.nextInt(100);
+            list.add(number);
+            tree.add(number);
+            assertTrue(tree.isHealthy());
+        }
+        
+        for (Integer i : list) {
+            tree.remove(i);
+            System.out.println(i);
+            assertTrue(tree.isHealthy());
         }
     }
 }
