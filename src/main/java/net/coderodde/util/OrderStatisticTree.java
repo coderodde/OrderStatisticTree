@@ -114,12 +114,60 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
         }
         
         if (x == null) {
-            System.out.println("up");
             return;
         }
         
         x = deleteNode(x);
         fixAfterModification(x, false);
+    }
+    
+    public T select(int index) {
+        checkIndex(index);
+        Node<T> node = root;
+        
+        while (true) {
+            if (index > node.count) { // 10 - index = 10
+                index -= node.count + 1;
+                node = node.right;
+            } else if (index < node.count) {
+                node = node.left;
+            } else {
+                return node.key;
+            }
+        }
+    }
+    
+    public int rank(T element) {
+        Node<T> node = root;
+        
+        if (root == null) {
+            return -1;
+        }
+        
+        int rank = root.count;
+        int cmp;
+        
+        while (node != null) {
+            if ((cmp = element.compareTo(node.key)) < 0) {
+                if (node.left == null) {
+                    return -1;
+                }
+                
+                rank -= (node.count - node.left.count);
+                node = node.left;
+            } else if (cmp > 0) {
+                if (node.right == null) {
+                    return -1;
+                }
+                
+                rank += 1 + node.right.count;
+                node = node.right;
+            } else {
+                break;
+            }
+        }
+        
+        return node == null ? -1 : rank;
     }
     
     public int size() {
@@ -134,6 +182,19 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
         modCount += size;
         root = null;
         size = 0; 
+    }
+    
+    private void checkIndex(int index) {
+        if (index < 0) {
+            throw new IndexOutOfBoundsException(
+                    "The input index is negative: " + index);
+        }
+        
+        if (index >= size) {
+            throw new IndexOutOfBoundsException(
+                    "The input index is too large: " + index +
+                    ", the size of this tree is " + size);
+        }
     }
     
     private Node<T> deleteNode(Node<T> node) {
