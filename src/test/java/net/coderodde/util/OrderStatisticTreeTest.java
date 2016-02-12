@@ -214,9 +214,9 @@ public class OrderStatisticTreeTest {
         }
         
         for (Integer i : list) {
+            System.out.println("i = " + i);
             tree.remove(i);
             boolean healthy = tree.isHealthy();
-            System.out.println("i = " + i);
             assertTrue(healthy);
         }
     }

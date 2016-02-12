@@ -385,7 +385,7 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
             if (height(parent.left) == height(parent.right) + 2) {
                 grandParent = parent.parent;
                 
-                if (height(parent.left.left) > height(parent.left.right)) {
+                if (height(parent.left.left) >= height(parent.left.right)) {
                     subTree = rightRotate(parent);
                 } else {
                     subTree = leftRightRotate(parent);
@@ -415,7 +415,7 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
             if (height(parent.right) == height(parent.left) + 2) {
                 grandParent = parent.parent;
                 
-                if (height(parent.right.right) > height(parent.right.left)) {
+                if (height(parent.right.right) >= height(parent.right.left)) {
                     subTree = leftRotate(parent);
                 } else {
                     subTree = rightLeftRotate(parent);
