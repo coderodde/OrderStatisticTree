@@ -36,5 +36,7 @@ public class Demo {
                 System.out.println("wrong! " + i);
             }
         }
+        
+        System.out.println("Healthy: " + tree.isHealthy());
     }
 }
