@@ -164,16 +164,14 @@ public class OrderStatisticTreeTest {
     
     @Test
     public void tryReproduceTheCounterBug() {
-        long seed = 17000001934765L; // System.nanoTime();
+        long seed =     System.nanoTime();
         Random random = new Random(seed);
         List<Integer> list = new ArrayList<>(10);
         
         System.out.println("tryReproduceTheCounterBug: seed = " + seed);
         
-        
-        
-        for (int i = 0; i < 10; ++i) {
-            int number = random.nextInt(100);
+        for (int i = 0; i < 100; ++i) {
+            int number = random.nextInt(1000);
             list.add(number);
             tree.add(number);
             assertTrue(tree.isHealthy());
