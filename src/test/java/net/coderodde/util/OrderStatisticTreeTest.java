@@ -1,6 +1,7 @@
 package net.coderodde.util;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -181,6 +182,40 @@ public class OrderStatisticTreeTest {
     }
     
     @Test
+    public void testIteratorThrowsOnDoubleRemove() {
+        for (int i = 10; i < 20; ++i) {
+            set.add(i);
+            tree.add(i);
+        }
+        
+        Iterator<Integer> iterator1 = set.iterator();
+        Iterator<Integer> iterator2 = tree.iterator();
+        
+        for (int i = 0; i < 3; ++i) {
+            assertEquals(iterator1.next(), iterator2.next());
+        }
+        
+        iterator1.remove();
+        iterator2.remove();
+        
+        try {
+            iterator1.remove();
+            fail("iterator1 should have thrown an exception.");
+        } catch (IllegalStateException ex) {
+            
+        }
+        
+        try {
+            iterator2.remove();
+            fail("iterator2 should have thrown an exception.");
+        } catch (IllegalStateException ex) {
+            
+        }
+    }
+    
+    
+    
+    @Test
     public void testIterator() {
         for (int i = 0; i < 5; ++i) {
             tree.add(i);
@@ -341,5 +376,107 @@ public class OrderStatisticTreeTest {
         }
         
         assertEquals(set.size(), tree.size());
+        assertTrue(tree.isHealthy());
+        assertTrue(set.containsAll(tree));
+        assertTrue(tree.containsAll(set));
+    }
+    
+    @Test
+    public void testIteratorConcurrentModification() {
+        for (int i = 0; i < 100; ++i) {
+            set.add(i);
+            tree.add(i);
+        }
+        
+        Iterator<Integer> iterator1 = set.iterator();
+        Iterator<Integer> iterator2 = tree.iterator();
+        
+        set.remove(10);
+        tree.remove(10);
+        
+        assertEquals(iterator1.hasNext(), iterator2.hasNext());
+        
+        boolean thrown = false;
+        
+        try {
+            iterator1.next();
+        } catch (ConcurrentModificationException ex) {
+            thrown = true;
+        }
+        
+        if (thrown) {
+            try {
+                iterator2.next();
+                fail("iterator2 should have thrown an exception.");
+            } catch (ConcurrentModificationException ex) {
+                
+            }
+        } else {
+            try {
+                iterator2.next();
+            } catch (ConcurrentModificationException ex) {
+                fail("iterator2. should not have thrown an exception.");
+            }
+        }
+    }
+    
+    @Test
+    public void testIteratorConcurrentRemove() {
+        for (int i = 10; i < 20; ++i) {
+            set.add(i);
+            tree.add(i);
+        }
+        
+        Iterator<Integer> iterator1 = set.iterator();
+        Iterator<Integer> iterator2 = tree.iterator();
+        
+        for (int i = 0; i < 4; ++i) {
+            iterator1.next();
+            iterator2.next();
+        }
+        
+        set.remove(2);
+        tree.remove(2);
+        
+        // None of them should throw.
+        iterator1.remove();
+        iterator2.remove();
+    }
+    
+    @Test
+    public void testConcurrentIterators() {
+        for (int i = 0; i < 10; ++i) {
+            set.add(i);
+            tree.add(i);
+        }
+        
+        Iterator<Integer> iterator1a = set.iterator();
+        Iterator<Integer> iterator1b = set.iterator();
+        Iterator<Integer> iterator2a = tree.iterator();
+        Iterator<Integer> iterator2b = tree.iterator();
+        
+        for (int i = 0; i < 3; ++i) {
+            iterator1a.next();
+            iterator2a.next();
+        }
+        
+        iterator1a.remove();
+        iterator2a.remove();
+        
+        assertEquals(iterator1b.hasNext(), iterator2b.hasNext());
+        
+        try {
+            iterator1b.next();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            iterator2b.next();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
     }
 }
