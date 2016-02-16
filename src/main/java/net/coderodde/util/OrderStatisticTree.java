@@ -641,39 +641,10 @@ implements OrderStatisticSet<T> {
             return true;
         }
         
-        boolean hasCycles = containsCycles();
-        
-        if (hasCycles) {
-            System.out.println("Has cycles.");
-            return false;
-        }
-        
-        boolean heightsOk = heightsAreCorrect();
-        
-        if (!heightsOk) {
-            System.out.println("Heights are not correct.");
-            return false;
-        }
-        
-        boolean isBalanced = isBalanced();
-        
-        if (!isBalanced) {
-            System.out.println("Is not balanced.");
-            return false;
-        }
-        
-        boolean wellIndexed = isWellIndexed();
-        
-        if (!wellIndexed) {
-            System.out.println("Is not well indexed.");
-            return false;
-        }
-        
-        return true;
-//        return !containsCycles() 
-//                && heightsAreCorrect() 
-//                && isBalanced()
-//                && isWellIndexed();
+        return !containsCycles() 
+                && heightsAreCorrect() 
+                && isBalanced()
+                && isWellIndexed();
     }
     
     private boolean containsCycles() {
@@ -744,42 +715,34 @@ implements OrderStatisticSet<T> {
         int leftHeight  = height(node.left);
         int rightHeight = height(node.right);
         
-        if (Math.abs(leftHeight - rightHeight) < 2) {
-            return true;
-        }
-        
-        System.out.println("left: " + leftHeight + ", right: " + rightHeight +
-                ", recorded: " + node.height);
-        return false;
+        return Math.abs(leftHeight - rightHeight) < 2;
     }
     
     private boolean isWellIndexed() {
-        return isWellIndexed(root);
+        return size == count(root);
     }
     
-    private boolean isWellIndexed(Node<T> node) {
-        if (node == null) {
-            return true;
-        }
-        
-        int tmp;
-        
-        if (node.count != (tmp = getTreeSize(node.left))) {
-            System.out.println("node.count = " + node.count + ", left tree size = " + tmp);
-            return false;
-        }
-        
-        return isWellIndexed(node.right);
-    }
-    
-    private int getTreeSize(Node<T> node) {
+    private int count(Node<T> node) {
         if (node == null) {
             return 0;
         }
         
-        int leftSubTreeSize  = getTreeSize(node.left);
-        int rightSubTreeSize = getTreeSize(node.right);
+        int leftTreeSize = count(node.left);
         
-        return leftSubTreeSize + 1 + rightSubTreeSize;
+        if (leftTreeSize == Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+        
+        if (node.count != leftTreeSize) {
+            return Integer.MIN_VALUE;
+        }
+        
+        int rightTreeSize = count(node.right);
+        
+        if (rightTreeSize == Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+        
+        return leftTreeSize + 1 + rightTreeSize;
     }
 }

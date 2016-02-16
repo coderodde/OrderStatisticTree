@@ -9,7 +9,7 @@ import java.util.TreeSet;
 public class Demo {
     
     private static void profileAgainstTreeSet() {
-        long seed = 34754478812218L; System.nanoTime();
+        long seed = System.nanoTime();
         final int size = 1_000_000;
         Random random = new Random(seed);
         TreeSet<Integer> treeSet = new TreeSet<>();
