@@ -65,6 +65,8 @@ implements OrderStatisticSet<T> {
                 );
             }
             
+            checkConcurrentModification();
+            
             Node<T> x = deleteNode(previousNode);
             fixAfterModification(x, false);
             

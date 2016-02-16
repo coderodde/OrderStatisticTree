@@ -435,12 +435,61 @@ public class OrderStatisticTreeTest {
             iterator2.next();
         }
         
+        // None of them contains 2, should not change the modification count.
         set.remove(2);
         tree.remove(2);
         
-        // None of them should throw.
         iterator1.remove();
         iterator2.remove();
+        
+        iterator1.next();
+        iterator2.next();
+        
+        set.remove(12);
+        tree.remove(12);
+        
+        // Both of them should throw.
+        try {
+            iterator1.remove();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+        
+        try {
+            iterator2.remove();
+            fail();
+        } catch (ConcurrentModificationException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testConcurrentOrIllegalStateOnRemove() {
+        for (int i = 0; i < 10; ++i) {
+            set.add(i);
+            tree.add(i);
+        }
+        
+        Iterator<Integer> iterator1 = set.iterator();
+        Iterator<Integer> iterator2 = tree.iterator();
+        
+        set.add(100);
+        tree.add(100);
+        
+        try {
+            set.iterator().remove();
+            fail();
+        } catch (IllegalStateException ex) {
+            
+        }
+        
+        try {
+            tree.iterator().remove();
+            fail();
+        } catch (IllegalStateException ex) {
+            
+        }
     }
     
     @Test
