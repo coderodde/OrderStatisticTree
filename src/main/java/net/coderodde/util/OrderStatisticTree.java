@@ -27,7 +27,15 @@ implements OrderStatisticSet<T> {
 
         private Node<T> previousNode;
         private Node<T> nextNode;
-        private final int expectedModCount = modCount;
+        private int expectedModCount = modCount;
+        
+        TreeIterator() {
+            if (root == null) {
+                nextNode = null;
+            } else {
+                nextNode = minimumNode(root);
+            }
+        }
         
         @Override
         public boolean hasNext() {
@@ -57,9 +65,15 @@ implements OrderStatisticSet<T> {
                 );
             }
             
-            
             Node<T> x = deleteNode(previousNode);
             fixAfterModification(x, false);
+            
+            if (x == nextNode) {
+                nextNode = previousNode;
+            }
+            
+            size--;
+            expectedModCount = ++modCount;
             previousNode = null;
         }
         

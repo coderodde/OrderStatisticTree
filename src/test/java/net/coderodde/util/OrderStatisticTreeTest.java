@@ -1,7 +1,9 @@
 package net.coderodde.util;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.TreeSet;
 import org.junit.Test;
@@ -26,6 +28,7 @@ public class OrderStatisticTreeTest {
         for (int i = 10; i < 30; i += 2) {
             assertTrue(tree.isHealthy());
             assertEquals(set.contains(i), tree.contains(i));
+            assertEquals(set.add(i), tree.add(i));
             assertEquals(set.add(i), tree.add(i));
             assertEquals(set.contains(i), tree.contains(i));
             assertTrue(tree.isHealthy());
@@ -152,7 +155,6 @@ public class OrderStatisticTreeTest {
     
     @Test
     public void tryReproduceTheCounterBug() {
-        // 33303034910970 finds the bug in a tree of size 10!
         long seed = System.nanoTime();
         Random random = new Random(seed);
         List<Integer> list = new ArrayList<>();
@@ -167,10 +169,177 @@ public class OrderStatisticTreeTest {
         }
         
         for (Integer i : list) {
-            System.out.println("i = " + i);
             tree.remove(i);
             boolean healthy = tree.isHealthy();
             assertTrue(healthy);
         }
+    }
+    
+    @Test(expected = NoSuchElementException.class)
+    public void testEmptyIterator() {
+        tree.iterator().next();
+    }
+    
+    @Test
+    public void testIterator() {
+        for (int i = 0; i < 5; ++i) {
+            tree.add(i);
+            set.add(i);
+        }
+        
+        Iterator<Integer> iterator1 = set.iterator();
+        Iterator<Integer> iterator2 = tree.iterator();
+        
+        for (int i = 0; i < 5; ++i) {
+            assertEquals(iterator1.hasNext(), iterator2.hasNext());
+            assertEquals(iterator1.next(), iterator2.next());
+        }
+        
+        assertEquals(iterator1.hasNext(), iterator2.hasNext());
+        
+        try {
+            iterator1.next();
+            fail("iterator1 should have thrown an exception.");
+        } catch (NoSuchElementException ex) {
+            
+        }
+        
+        try {
+            iterator2.next();
+            fail("iterator1 should have thrown an exception.");
+        } catch (NoSuchElementException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testRemoveBeforeNextThrowsEmpty() {
+        try {
+            set.iterator().remove();
+            fail("The set iterator should have thrown an exception.");
+        } catch (IllegalStateException ex) {
+            
+        }
+        
+        try {
+            tree.iterator().remove();
+            fail("The tree iterator should have thrown an exception.");
+        } catch (IllegalStateException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testRemoveThrowsWithoutNext() {
+        for (int i = 0; i < 10; ++i) {
+            tree.add(i);
+            set.add(i);
+        }
+        
+        Iterator<Integer> iterator1 = set.iterator();
+        Iterator<Integer> iterator2 = tree.iterator();
+        
+        for (int i = 0; i < 4; ++i) {
+            assertEquals(iterator1.hasNext(), iterator2.hasNext());
+            assertEquals(iterator1.next(), iterator2.next());
+        }
+        
+        iterator1.remove();
+        iterator2.remove();
+        
+        try {
+            iterator1.remove();
+            fail("Set iterator should have thrown an exception.");
+        } catch (IllegalStateException ex) {
+            
+        }
+        
+        try {
+            iterator2.remove();
+            fail("Tree iterator should have thrown an exception.");
+        } catch (IllegalStateException ex) {
+            
+        }
+    }
+    
+    @Test
+    public void testIteratorRemove() {
+        for (int i = 10; i < 16; ++i) {
+            assertEquals(set.add(i), tree.add(i));
+        }
+        
+        Iterator<Integer> iterator1 = set.iterator();
+        Iterator<Integer> iterator2 = tree.iterator();
+        
+        assertEquals(iterator1.hasNext(), iterator2.hasNext());
+        assertEquals(iterator1.next(), iterator2.next());
+        
+        assertEquals(iterator1.hasNext(), iterator2.hasNext());
+        assertEquals(iterator1.next(), iterator2.next());
+        
+        iterator1.remove(); // remove 11
+        iterator2.remove(); 
+        
+        assertEquals(iterator1.hasNext(), iterator2.hasNext());
+        assertEquals(iterator1.next(), iterator2.next());
+        
+        assertEquals(iterator1.hasNext(), iterator2.hasNext());
+        assertEquals(iterator1.next(), iterator2.next());
+        
+        iterator1.remove(); // remove 13
+        iterator2.remove(); 
+        
+        assertEquals(set.size(), tree.size());
+        
+        for (int i = 10; i < 16; ++i) {
+            assertEquals(set.contains(i), tree.contains(i));
+        }
+    }
+    
+    @Test
+    public void testIteratorBruteForce() {
+        for (int i = 0; i < 10_000; ++i) {
+            assertEquals(set.add(i), tree.add(i));
+        }
+        
+        Iterator<Integer> iterator1 = set.iterator();
+        Iterator<Integer> iterator2 = tree.iterator();
+        
+        long seed = System.nanoTime();
+        Random random = new Random(seed);
+        
+        System.out.println("testIteratorBruteForce - seed: " + seed);
+        
+        while (true) {
+            if (!iterator1.hasNext()) {
+                assertFalse(iterator2.hasNext());
+            }
+            
+            boolean toRemove = random.nextBoolean();
+            
+            if (toRemove) {
+                try {
+                    iterator1.remove();
+                    iterator2.remove();
+                } catch (IllegalStateException ex) {
+                    try {
+                        iterator2.remove();
+                        fail("iterator2 should have thrown an exception.");
+                    } catch (IllegalStateException ex2) {
+
+                    }
+                }
+            } else {
+                assertEquals(iterator1.hasNext(), iterator2.hasNext());
+                
+                if (iterator1.hasNext()) {
+                    assertEquals(iterator1.next(), iterator2.next());
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        assertEquals(set.size(), tree.size());
     }
 }
