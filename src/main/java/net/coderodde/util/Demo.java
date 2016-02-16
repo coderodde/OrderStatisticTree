@@ -75,13 +75,59 @@ public class Demo {
                           (endTime - startTime) / 1e6);
         
         System.out.println("Healthy: " + orderTree.isHealthy());
+        
+        final int n = 500;
+        
+        startTime = System.nanoTime();
+        
+        for (int i = 0; i < n; ++i) {
+            get(treeSet, i);
+        }
+        
+        endTime = System.nanoTime();
+        
+        System.out.printf("TreeSet get() hack in %.2f millseconds.\n",
+                          (endTime - startTime) / 1e6);
+        
+        startTime = System.nanoTime();
+        
+        for (int i = 0; i < n; ++i) {
+            orderTree.get(i);
+        }
+        
+        endTime = System.nanoTime();
+        
+        System.out.printf("OrderStatisticTree.get() in %.2f millseconds.\n",
+                          (endTime - startTime) / 1e6);
+        
+        startTime = System.nanoTime();
+        
+        for (int i = 0; i < n; ++i) {
+            indexOf(treeSet, i);
+        }
+        
+        endTime = System.nanoTime();
+        
+        System.out.printf("TreeSet indexOf() hack in %.2f millseconds.\n",
+                          (endTime - startTime) / 1e6);
+        
+        startTime = System.nanoTime();
+        
+        for (int i = 0; i < n; ++i) {
+            orderTree.indexOf(i);
+        }
+        
+        endTime = System.nanoTime();
+        
+        System.out.printf("OrderStatisticTree.indexOf() in %.2f millseconds.\n",
+                          (endTime - startTime) / 1e6);
     }
     
     public static void main(String[] args) {
         profileAgainstTreeSet();
     }
     
-    private static Integer select(TreeSet<Integer> set, int index) {
+    private static Integer get(TreeSet<Integer> set, int index) {
         Iterator<Integer> i = set.iterator();
         
         while (i.hasNext()) {
@@ -96,7 +142,7 @@ public class Demo {
         return -1;
     }
     
-    private static int rank(TreeSet<Integer> set, Integer element) {
+    private static int indexOf(TreeSet<Integer> set, Integer element) {
         int index = 0;
         
         for (Integer i : set) {
