@@ -1,6 +1,10 @@
 package net.coderodde.util;
 
+import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -11,7 +15,137 @@ import java.util.Set;
  * @version 1.6 (Feb 11, 2016)
  * @param <T> the actual element type.
  */
-public class OrderStatisticTree<T extends Comparable<? super T>> {
+public class OrderStatisticTree<T extends Comparable<? super T>> 
+implements OrderStatisticSet<T> {
+
+    @Override
+    public Iterator<T> iterator() {
+        return new TreeIterator();
+    }
+    
+    private final class TreeIterator implements Iterator<T> {
+
+        private Node<T> previousNode;
+        private Node<T> nextNode;
+        private final int expectedModCount = modCount;
+        
+        @Override
+        public boolean hasNext() {
+            return nextNode != null;
+        }
+
+        @Override
+        public T next() {
+            if (nextNode == null) {
+                throw new NoSuchElementException("Iteration exceeded.");
+            }
+            
+            checkConcurrentModification();
+            T datum = nextNode.key;
+            previousNode = nextNode;
+            nextNode = successorOf(nextNode);
+            return datum;
+        }
+        
+        @Override
+        public void remove() {
+            if (previousNode == null) {
+                throw new IllegalStateException(
+                        nextNode == null ? 
+                            "Not a single call to next(); nothing to remove." :
+                            "Removing the same element twice."
+                );
+            }
+            
+            
+            Node<T> x = deleteNode(previousNode);
+            fixAfterModification(x, false);
+            previousNode = null;
+        }
+        
+        private void checkConcurrentModification() {
+            if (expectedModCount != modCount) {
+                throw new ConcurrentModificationException(
+                        "The set was modified while iterating.");
+            }
+        }
+    }
+
+    @Override
+    public Object[] toArray() {
+        Object[] array = new Object[size];
+        Iterator<T> iterator = iterator();
+        int index = 0;
+        
+        while (iterator.hasNext()) {
+            array[index++] = iterator.next();
+        }
+        
+        return array;
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        for (Object element : c) {
+            if (!contains((T) element)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends T> c) {
+        boolean modified = false;
+        
+        for (T element : c) {
+            if (add(element)) {
+                modified = true;
+            }
+        }
+        
+        return modified;
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        if (!c.getClass().equals(HashSet.class.getClass())) {
+            c = new HashSet<>(c);
+        }
+        
+        Iterator<T> iterator = iterator();
+        boolean modified = false;
+        
+        while (iterator.hasNext()) {
+            T element = iterator.next();
+            
+            if (!c.contains(element)) {
+                iterator.remove();
+                modified = true;
+            }
+        }
+        
+        return modified;
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        boolean modified = false;
+        
+        for (Object element : c) {
+            if (remove((T) element)) {
+                modified = true;
+            }
+        }
+        
+        return modified;
+    }
 
     private static final class Node<T> {
         T key;
@@ -32,14 +166,15 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
     private int size;
     private int modCount;
     
-    public void add(T element) {
+    @Override
+    public boolean add(T element) {
         Objects.requireNonNull(element, "The input element is null.");
         
         if (root == null) {
             root = new Node<>(element);
             size = 1;
             modCount++;
-            return;
+            return true;
         }
         
         Node<T> parent = null;
@@ -51,7 +186,7 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
             
             if (cmp == 0) {
                 // The element is already in this tree.
-                return;
+                return false;
             }
             
             parent = node;
@@ -73,6 +208,7 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
         
         newnode.parent = parent;
         size++;
+        modCount++;
         Node<T> hi = parent;
         Node<T> lo = newnode;
         
@@ -86,9 +222,12 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
         }
         
         fixAfterModification(newnode, true);
+        return true;
     }
     
-    public boolean contains(T element) {
+    @Override
+    public boolean contains(Object o) {
+        T element = (T) o;
         Node<T> x = root;
         int cmp;
         
@@ -103,7 +242,9 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
         return x != null;
     }
     
-    public void remove(T element) {
+    @Override
+    public boolean remove(Object o) {
+        T element = (T) o;
         Node<T> x = root;
         int cmp;
         
@@ -116,14 +257,18 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
         }
         
         if (x == null) {
-            return;
+            return false;
         }
         
         x = deleteNode(x);
         fixAfterModification(x, false);
+        size--;
+        modCount++;
+        return true;
     }
     
-    public T select(int index) {
+    @Override
+    public T get(int index) {
         checkIndex(index);
         Node<T> node = root;
         
@@ -139,7 +284,8 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
         }
     }
     
-    public int rank(T element) {
+    @Override
+    public int indexOf(T element) {
         Node<T> node = root;
         
         if (root == null) {
@@ -172,18 +318,42 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
         return node == null ? -1 : rank;
     }
     
+    @Override
     public int size() {
         return size;
     }
     
+    @Override
     public boolean isEmpty() {
         return size == 0;
     }
     
+    @Override
     public void clear() {
         modCount += size;
         root = null;
         size = 0; 
+    }
+    
+    private Node<T> successorOf(Node<T> node) {
+        if (node.right != null) {
+            node = node.right;
+            
+            while (node.left != null) {
+                node = node.left;
+            }
+            
+            return node;
+        }
+        
+        Node<T> parent = node.parent;
+        
+        while (parent != null && parent.right == node) {
+            node = parent;
+            parent = parent.parent;
+        }
+        
+        return parent;
     }
     
     private void checkIndex(int index) {
@@ -230,8 +400,6 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
                 parent.right = null;
             }
             
-            --size;
-            ++modCount;
             return node;
         }
         
@@ -250,8 +418,6 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
             
             if (parent == null) {
                 root = child;
-                --size;
-                ++modCount;
                 return node;
             }
             
@@ -260,9 +426,6 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
             } else {
                 parent.right = child;
             }
-            
-            --size;
-            ++modCount;
             
             Node<T> hi = parent;
             Node<T> lo = child;
@@ -308,10 +471,6 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
             hi = hi.parent;
         }
         
-//        parent.count--;
-//        addToCounters(parent, -1);
-        --size;
-        ++modCount;
         successor.key = tmpKey;
         return successor;
     }
@@ -410,9 +569,7 @@ public class OrderStatisticTree<T extends Comparable<? super T>> {
                     // required in order to maintain the balance.
                     return;
                 }
-            } 
-            
-            if (height(parent.right) == height(parent.left) + 2) {
+            } else if (height(parent.right) == height(parent.left) + 2) {
                 grandParent = parent.parent;
                 
                 if (height(parent.right.right) >= height(parent.right.left)) {

@@ -3,6 +3,7 @@ package net.coderodde.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.TreeSet;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -10,97 +11,92 @@ import org.junit.Before;
 public class OrderStatisticTreeTest {
     
     private final OrderStatisticTree<Integer> tree = new OrderStatisticTree<>();
+    private final TreeSet<Integer> set = new TreeSet<>();
     
     @Before
     public void before() {
         tree.clear();
+        set.clear();
     }
     
     @Test
     public void testAdd() {
-        assertTrue(tree.isEmpty());
+        assertEquals(set.isEmpty(), tree.isEmpty());
         
-        for (int i = 10; i > 0; --i) {
-            assertEquals(10 - i, tree.size());
-            tree.add(2 * i);
+        for (int i = 10; i < 30; i += 2) {
             assertTrue(tree.isHealthy());
-            assertEquals(11 - i, tree.size());
-            assertFalse(tree.isEmpty());
+            assertEquals(set.contains(i), tree.contains(i));
+            assertEquals(set.add(i), tree.add(i));
+            assertEquals(set.contains(i), tree.contains(i));
+            assertTrue(tree.isHealthy());
         }
         
-        assertEquals(10, tree.size());
+        assertEquals(set.isEmpty(), tree.isEmpty());
     }
 
     @Test
     public void testContains() {
-        
-        for (int i = 0; i < 100; ++i) {
-            assertFalse(tree.contains(i));
-            assertTrue(tree.isEmpty());
-        }
-        
-        for (int i = 0; i < 100; ++i) {
-            tree.add(i);
+        for (int i = 100; i < 200; i += 3) {
             assertTrue(tree.isHealthy());
-            assertFalse(tree.isEmpty());
+            assertEquals(set.add(i), tree.add(i));
+            assertTrue(tree.isHealthy());
         }
         
-        for (int i = 99; i >= 0; --i) {
-            assertTrue(tree.contains(i));
-            assertFalse(tree.isEmpty());
+        assertEquals(set.size(), tree.size());
+        
+        for (int i = 0; i < 300; ++i) {
+            assertEquals(set.contains(i), tree.contains(i));
         }
     }
 
     @Test
     public void testRemove() {
-        for (int i = 30; i > 20; --i) {
-            tree.add(i);
+        for (int i = 0; i < 200; ++i) {
+            assertEquals(set.add(i), tree.add(i));
         }
         
-        assertTrue(tree.isHealthy());
-        
-        for (int i = 21, size = 10; i <= 27; ++i, --size) {
-            assertEquals(size, tree.size());
-            assertFalse(tree.isEmpty());
-            tree.remove(i);
-//            System.out.println(i);
+        for (int i = 50; i < 150; i += 2) {
+            assertEquals(set.remove(i), tree.remove(i));
             assertTrue(tree.isHealthy());
-            assertFalse(tree.isEmpty());
-            assertEquals(size - 1, tree.size());
         }
         
-        assertEquals(3, tree.size());
+        for (int i = -100; i < 300; ++i) {
+            assertEquals(set.contains(i), tree.contains(i));
+        }
     }
 
     @Test
     public void testSize() {
-        for (int i = 0; i < 5; ++i) {
-            assertEquals(i, tree.size());
-            tree.add(i);
-            assertTrue(tree.isHealthy());
-            assertEquals(i + 1, tree.size());
+        for (int i = 0; i < 200; ++i) {
+            assertEquals(set.size(), tree.size());
+            assertEquals(set.add(i), tree.add(i));
+            assertEquals(set.size(), tree.size());
         }
     }
     
     @Test
-    public void testSelect() {
+    public void testIndexOf() {
         for (int i = 0; i < 100; ++i) {
-            tree.add(2 * i);
+            assertTrue(tree.add(i * 2));
         }
         
-        for (int i = 0; i < tree.size(); ++i) {
-            assertEquals(Integer.valueOf(2 * i), tree.select(i));
+        for (int i = 0; i < 100; ++i) {
+            assertEquals(i, tree.indexOf(2 * i));
+        }
+        
+        for (int i = 100; i < 150; ++i) {
+            assertEquals(-1, tree.indexOf(2 * i));
         }
     }
     
     @Test(expected = IndexOutOfBoundsException.class)
-    public void testEmptyTreeSelectThrowsOnNegativeIndex() {
-        tree.select(-1);
+    public void testEmptyTreeGetThrowsOnNegativeIndex() {
+        tree.get(-1);
     }
     
     @Test(expected = IndexOutOfBoundsException.class)
     public void testEmptyTreeSelectThrowsOnTooLargeIndex() {
-        tree.select(0);
+        tree.get(0);
     }
     
     @Test(expected = IndexOutOfBoundsException.class)
@@ -109,7 +105,7 @@ public class OrderStatisticTreeTest {
             tree.add(i);
         }
         
-        tree.select(-1);
+        tree.get(-1);
     }
     
     @Test(expected = IndexOutOfBoundsException.class)
@@ -118,50 +114,7 @@ public class OrderStatisticTreeTest {
             tree.add(i);
         }
         
-        tree.select(5);
-    }
-    
-    @Test
-    public void testRank() {
-        for (int i = 19; i >= 10; --i) {
-            tree.add(3 * i);
-        }
-        
-        for (int i = 10; i < 20; ++i) {
-            assertEquals(i - 10, tree.rank(3 * i));
-        }
-        
-        tree.clear();
-        
-        for (int i = 0; i < 10; ++i) {
-            tree.add(i);
-        }
-        
-        for (int i = 0; i < 10; ++i) {
-            assertEquals(i, tree.rank(i));
-        }
-        
-        tree.clear();
-        
-        for (int i = 0; i < 20; ++i) {
-            tree.add(i);
-        }
-        
-        for (int i = 30; i < 50; ++i) {
-            tree.add(i);
-        }
-        
-        for (int i = 20; i < 30; ++i) {
-            assertEquals(-1, tree.rank(i));
-        }
-        
-        for (int i = -10; i < 0; ++i) {
-            assertEquals(-1, tree.rank(i));
-        }
-        
-        for (int i = 50; i < 60; ++i) {
-            assertEquals(-1, tree.rank(i));
-        }
+        tree.get(5);
     }
     
     @Test
@@ -200,7 +153,7 @@ public class OrderStatisticTreeTest {
     @Test
     public void tryReproduceTheCounterBug() {
         // 33303034910970 finds the bug in a tree of size 10!
-        long seed = 33303034910970L; System.nanoTime();
+        long seed = System.nanoTime();
         Random random = new Random(seed);
         List<Integer> list = new ArrayList<>();
         
