@@ -1,7 +1,10 @@
 package net.coderodde.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -37,7 +40,36 @@ public class OrderStatisticTreeTest {
         
         assertEquals(set.isEmpty(), tree.isEmpty());
     }
+    
+    @Test
+    public void testAddAll() {
+        for (int i = 0; i < 10; ++i) {
+            assertEquals(set.add(i), tree.add(i));
+        }
+        
+        Collection<Integer> coll = Arrays.asList(10, 9, 7, 11, 12);
+        
+        assertEquals(set.addAll(coll), tree.addAll(coll));
+        assertEquals(set.size(), tree.size());
+        
+        for (int i = -10; i < 20; ++i) {
+            assertEquals(set.contains(i), tree.contains(i));
+        }
+    }
 
+    @Test
+    public void testClear() {
+        for (int i = 0; i < 2000; ++i) {
+            set.add(i);
+            tree.add(i);
+        }
+        
+        assertEquals(set.size(), tree.size());
+        set.clear();
+        tree.clear();
+        assertEquals(set.size(), tree.size());
+    }
+    
     @Test
     public void testContains() {
         for (int i = 100; i < 200; i += 3) {
@@ -52,6 +84,24 @@ public class OrderStatisticTreeTest {
             assertEquals(set.contains(i), tree.contains(i));
         }
     }
+    
+    @Test 
+    public void testContainsAll() {
+        for (int i = 0; i < 50; ++i) {
+            set.add(i);
+            tree.add(i);
+        }
+        
+        Collection<Integer> coll = new HashSet<>();
+        
+        for (int i = 10; i < 20; ++i) {
+            coll.add(i);
+        }
+        
+        assertEquals(set.containsAll(coll), tree.containsAll(coll));
+        coll.add(100);
+        assertEquals(set.containsAll(coll), tree.containsAll(coll));
+    }
 
     @Test
     public void testRemove() {
@@ -65,6 +115,32 @@ public class OrderStatisticTreeTest {
         }
         
         for (int i = -100; i < 300; ++i) {
+            assertEquals(set.contains(i), tree.contains(i));
+        }
+    }
+    
+    @Test
+    public void testRemoveAll() {
+        for (int i = 0; i < 40; ++i) {
+            set.add(i);
+            tree.add(i);
+        }
+        
+        Collection<Integer> coll = new HashSet<>();
+        
+        for (int i = 10; i < 20; ++i) {
+            coll.add(i);
+        }
+        
+        assertEquals(set.removeAll(coll), tree.removeAll(coll));
+        
+        for (int i = -10; i < 50; ++i) {
+            assertEquals(set.contains(i), tree.contains(i));
+        }
+        
+        assertEquals(set.removeAll(coll), tree.removeAll(coll));
+        
+        for (int i = -10; i < 50; ++i) {
             assertEquals(set.contains(i), tree.contains(i));
         }
     }
@@ -93,6 +169,14 @@ public class OrderStatisticTreeTest {
         }
     }
     
+    @Test
+    public void testEmpty() {
+        assertEquals(set.isEmpty(), tree.isEmpty());
+        set.add(0);
+        tree.add(0);
+        assertEquals(set.isEmpty(), tree.isEmpty());
+    }
+    
     @Test(expected = IndexOutOfBoundsException.class)
     public void testEmptyTreeGetThrowsOnNegativeIndex() {
         tree.get(-1);
@@ -119,6 +203,17 @@ public class OrderStatisticTreeTest {
         }
         
         tree.get(5);
+    }
+    
+    @Test
+    public void testGet() {
+        for (int i = 0; i < 100; i += 3) {
+            tree.add(i);
+        }
+        
+        for (int i = 0; i < tree.size(); ++i) {
+            assertEquals(Integer.valueOf(3 * i), tree.get(i));
+        }
     }
     
     @Test
@@ -295,6 +390,22 @@ public class OrderStatisticTreeTest {
         } catch (IllegalStateException ex) {
             
         }
+    }
+    
+    @Test
+    public void testRetainAll() {
+        for (int i = 0; i < 100; ++i) {
+            set.add(i);
+            tree.add(i);
+        }
+        
+        Collection<Integer> coll = Arrays.asList(26, 29, 25);
+        
+        assertEquals(set.retainAll(coll), tree.retainAll(coll));
+        assertEquals(set.size(), tree.size());
+        
+        assertTrue(set.containsAll(tree));
+        assertTrue(tree.containsAll(set));
     }
     
     @Test
@@ -527,5 +638,46 @@ public class OrderStatisticTreeTest {
         } catch (ConcurrentModificationException ex) {
             
         }
+    }
+    
+    @Test
+    public void testToArray() {
+        Random r = new Random();
+        
+        for (int i = 0; i < 50; ++i) {
+            int num = r.nextInt();
+            set.add(num);
+            tree.add(num);
+        }
+        
+        assertTrue(Arrays.equals(set.toArray(), tree.toArray()));
+    }
+    
+    @Test
+    public void testToArrayGeneric() {
+        for (int i = 0; i < 100; ++i) {
+            set.add(i);
+            tree.add(i);
+        }
+        
+        Integer[] array1before = new Integer[99];
+        Integer[] array2before = new Integer[99];
+        
+        Integer[] array1after = set.toArray(array1before);
+        Integer[] array2after = tree.toArray(array2before);
+        
+        assertFalse(array1before == array1after);
+        assertFalse(array2before == array2after);
+        assertTrue(Arrays.equals(array1after, array2after));
+        
+        set.remove(1);
+        tree.remove(1);
+        
+        array1after = set.toArray(array1before);
+        array2after = tree.toArray(array2before);
+        
+        assertTrue(array1before == array1after);
+        assertTrue(array2before == array2after);
+        assertTrue(Arrays.equals(array1after, array2after));
     }
 }

@@ -1,5 +1,6 @@
 package net.coderodde.util;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
@@ -102,7 +103,23 @@ implements OrderStatisticSet<T> {
 
     @Override
     public <T> T[] toArray(T[] a) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Iterator iterator = iterator();
+        
+        if (size > a.length) {
+            a = Arrays.copyOf(a, size);
+        }
+        
+        int index = 0; 
+
+        for (; index < size; ++index) {
+            a[index] = (T) iterator.next();
+        }
+
+        if (index < a.length) {
+            a[index] = null;
+        }
+        
+        return a;
     }
 
     @Override
