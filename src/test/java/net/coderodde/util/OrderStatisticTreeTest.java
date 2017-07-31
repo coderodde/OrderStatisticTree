@@ -118,6 +118,13 @@ public class OrderStatisticTreeTest {
             assertEquals(set.contains(i), tree.contains(i));
         }
     }
+
+    @Test
+    public void testRemoveLast() {
+        tree.add(1);
+        tree.remove(1);
+        assertEquals(0, tree.size());
+    }
     
     @Test
     public void testRemoveAll() {
