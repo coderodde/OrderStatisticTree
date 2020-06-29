@@ -16,7 +16,9 @@ import org.junit.Before;
 
 public class OrderStatisticTreeTest {
     
-    private final OrderStatisticsTree<Integer> tree = new OrderStatisticsTree<>();
+    private final OrderStatisticsTree<Integer> tree =
+            new OrderStatisticsTree<>();
+    
     private final TreeSet<Integer> set = new TreeSet<>();
     
     @Before
@@ -466,6 +468,7 @@ public class OrderStatisticTreeTest {
         while (true) {
             if (!iterator1.hasNext()) {
                 assertFalse(iterator2.hasNext());
+                break;
             }
             
             boolean toRemove = random.nextBoolean();

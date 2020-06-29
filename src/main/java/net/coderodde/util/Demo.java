@@ -101,6 +101,28 @@ public class Demo {
         
         System.out.println("Healthy: " + orderTree.isHealthy());
         
+        Iterator<Integer> iterator1 = treeSet.iterator();
+        Iterator<Integer> iterator2 = orderTree.iterator();
+        
+        while (true) {
+            if (iterator1.hasNext() != iterator2.hasNext()) {
+                throw new IllegalStateException(
+                        "Iterators disagree on hasNext!");
+            }
+            
+            if (iterator1.hasNext() == false) {
+                break;
+            }
+            
+            Integer int1 = iterator1.next();
+            Integer int2 = iterator2.next();
+            
+            if (!int1.equals(int2)) {
+                throw new IllegalStateException(
+                        "Iterators returned different values!");
+            }
+        }
+        
         final int n = 500;
         
         startTime = System.nanoTime();

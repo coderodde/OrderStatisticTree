@@ -75,8 +75,8 @@ implements OrderStatisticsSet<T> {
                 nextNode = previousNode;
             }
             
-            modCount += decrementSize();
-            expectedModCount = modCount;
+            expectedModCount = ++modCount;
+            size--;
             previousNode = null;
         }
         
@@ -295,7 +295,8 @@ implements OrderStatisticsSet<T> {
         
         x = deleteNode(x);
         fixAfterModification(x, false);
-        modCount += decrementSize();
+        size--;
+        modCount++;
         return true;
     }
     
@@ -409,7 +410,6 @@ implements OrderStatisticsSet<T> {
             if (parent == null) {
                 // 'node' is the root node of this tree.
                 root = null;
-                size = 0;
                 ++modCount;
                 return node;
             }
@@ -506,20 +506,6 @@ implements OrderStatisticsSet<T> {
 
         return node;
         
-    }
-
-    /**
-     * Attempts to reduce tree size by one. Does nothing if tree is already empty.
-     *
-     * @return modification count (1 if size was reduced, 0 otherwise)
-     */
-    private int decrementSize() {
-        if (size > 0) {
-            size--;
-            return 1;
-        }
-        
-        return 0;
     }
 
     private Node<T> minimumNode(Node<T> node) {
