@@ -13,7 +13,7 @@ public class Demo {
         final int size = 1_000_000;
         Random random = new Random(seed);
         TreeSet<Integer> treeSet = new TreeSet<>();
-        OrderStatisticTree<Integer> orderTree = new OrderStatisticTree<>();
+        OrderStatisticsTree<Integer> orderTree = new OrderStatisticsTree<>();
         
         System.out.println("Seed = " + seed);
         
@@ -43,11 +43,36 @@ public class Demo {
             
         endTime = System.nanoTime();
         
-        System.out.printf("OrderStatisticTree.add() in %.2f millseconds.\n",
+        System.out.printf("OrderStatisticsTree.add() in %.2f millseconds.\n",
                           (endTime - startTime) / 1e6);
         
         System.out.println("Healthy: " + orderTree.isHealthy());
         
+        ////
+        startTime = System.nanoTime();
+        
+        for (Integer i : treeSet) {
+            
+        }
+        
+        endTime = System.nanoTime();
+        
+        System.out.printf("TreeSet iterator in %.2f milliseconds.\n",
+                          (endTime - startTime) / 1e6);
+        
+        ////
+        startTime = System.nanoTime();
+        
+        for (Integer i : orderTree) {
+            
+        }
+        
+        endTime = System.nanoTime();
+        System.out.printf(
+                "OrderStatisticsTree iterator in %.2f milliseconds.\n",
+                (endTime - startTime) / 1e6f);
+        
+        ////
         for (int i = 0; i < size / 4; ++i) {
             toRemove.add(contents.get(random.nextInt(contents.size())));
         }
@@ -71,7 +96,7 @@ public class Demo {
         
         endTime = System.nanoTime();
         
-        System.out.printf("OrderStatisticTree.remove() in %.2f millseconds.\n",
+        System.out.printf("OrderStatisticsTree.remove() in %.2f millseconds.\n",
                           (endTime - startTime) / 1e6);
         
         System.out.println("Healthy: " + orderTree.isHealthy());
@@ -97,7 +122,7 @@ public class Demo {
         
         endTime = System.nanoTime();
         
-        System.out.printf("OrderStatisticTree.get() in %.2f millseconds.\n",
+        System.out.printf("OrderStatisticsTree.get() in %.2f millseconds.\n",
                           (endTime - startTime) / 1e6);
         
         startTime = System.nanoTime();
@@ -119,7 +144,7 @@ public class Demo {
         
         endTime = System.nanoTime();
         
-        System.out.printf("OrderStatisticTree.indexOf() in %.2f millseconds.\n",
+        System.out.printf("OrderStatisticsTree.indexOf() in %.2f millseconds.\n",
                           (endTime - startTime) / 1e6);
     }
     

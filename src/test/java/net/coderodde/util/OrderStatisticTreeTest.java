@@ -16,7 +16,7 @@ import org.junit.Before;
 
 public class OrderStatisticTreeTest {
     
-    private final OrderStatisticTree<Integer> tree = new OrderStatisticTree<>();
+    private final OrderStatisticsTree<Integer> tree = new OrderStatisticsTree<>();
     private final TreeSet<Integer> set = new TreeSet<>();
     
     @Before

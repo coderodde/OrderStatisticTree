@@ -16,8 +16,8 @@ import java.util.Set;
  * @version 1.6 (Feb 11, 2016)
  * @param <T> the actual element type.
  */
-public class OrderStatisticTree<T extends Comparable<? super T>> 
-implements OrderStatisticSet<T> {
+public class OrderStatisticsTree<T extends Comparable<? super T>> 
+implements OrderStatisticsSet<T> {
 
     @Override
     public Iterator<T> iterator() {
@@ -435,76 +435,77 @@ implements OrderStatisticSet<T> {
             return node;
         }
         
-        if (node.left == null || node.right == null) {
-            Node<T> child;
-            
-            // 'node' has only one child.
-            if (node.left != null) {
-                child = node.left;
-            } else {
-                child = node.right;
-            }
-            
-            Node<T> parent = node.parent;
-            child.parent = parent;
-            
-            if (parent == null) {
-                root = child;
-                return node;
-            }
-            
-            if (node == parent.left) {
+        if (node.left != null && node.right != null) {
+            // 'node' has both children.
+            T tmpKey = node.key;
+            Node<T> successor = minimumNode(node.right);
+            node.key = successor.key;
+            Node<T> child = successor.right;
+            Node<T> parent = successor.parent;
+
+            if (parent.left == successor) {
                 parent.left = child;
             } else {
                 parent.right = child;
             }
-            
-            Node<T> hi = parent;
+
+            if (child != null) {
+                child.parent = parent;
+            }
+
             Node<T> lo = child;
-            
+            Node<T> hi = parent;
+
             while (hi != null) {
                 if (hi.left == lo) {
                     hi.count--;
                 }
-                
+
                 lo = hi;
                 hi = hi.parent;
             }
-            
-            return node;
+
+            successor.key = tmpKey;
+            return successor;
         }
         
-        // 'node' has both children.
-        T tmpKey = node.key;
-        Node<T> successor = minimumNode(node.right);
-        node.key = successor.key;
-        Node<T> child = successor.right;
-        Node<T> parent = successor.parent;
-        
-        if (parent.left == successor) {
+        Node<T> child;
+
+        // 'node' has only one child.
+        if (node.left != null) {
+            child = node.left;
+        } else {
+            child = node.right;
+        }
+
+        Node<T> parent = node.parent;
+        child.parent = parent;
+
+        if (parent == null) {
+            root = child;
+            return node;
+        }
+
+        if (node == parent.left) {
             parent.left = child;
         } else {
             parent.right = child;
         }
-        
-        if (child != null) {
-            child.parent = parent;
-        }
-        
-        Node<T> lo = child;
+
         Node<T> hi = parent;
-        
+        Node<T> lo = child;
+
         while (hi != null) {
             if (hi.left == lo) {
                 hi.count--;
             }
-            
+
             lo = hi;
             hi = hi.parent;
         }
+
+        return node;
         
-        successor.key = tmpKey;
-        return successor;
     }
 
     /**
@@ -517,6 +518,7 @@ implements OrderStatisticSet<T> {
             size--;
             return 1;
         }
+        
         return 0;
     }
 
