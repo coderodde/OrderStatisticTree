@@ -13,7 +13,7 @@ public class Demo {
         final int size = 1_000_000;
         Random random = new Random(seed);
         TreeSet<Integer> treeSet = new TreeSet<>();
-        OrderStatisticsTree<Integer> orderTree = new OrderStatisticsTree<>();
+        OrderStatisticTree<Integer> orderTree = new OrderStatisticTree<>();
         
         System.out.println("Seed = " + seed);
         

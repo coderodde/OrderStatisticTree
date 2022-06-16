@@ -15,7 +15,7 @@ import java.util.Set;
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Feb 16, 2016)
  */
-public interface OrderStatisticsSet<T> extends Set<T> {
+public interface OrderStatisticSet<T> extends Set<T> {
     
     /**
      * Returns the <code>index</code>th smallest element from this set.

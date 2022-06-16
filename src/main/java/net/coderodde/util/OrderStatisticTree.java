@@ -16,8 +16,8 @@ import java.util.Set;
  * @version 1.6 (Feb 11, 2016)
  * @param <T> the actual element type.
  */
-public class OrderStatisticsTree<T extends Comparable<? super T>> 
-implements OrderStatisticsSet<T> {
+public class OrderStatisticTree<T extends Comparable<? super T>> 
+implements OrderStatisticSet<T> {
 
     @Override
     public Iterator<T> iterator() {
